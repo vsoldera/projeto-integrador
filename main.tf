@@ -17,8 +17,12 @@ data "aws_vpc" "default" {
   default = true
 }
 
+variable "bucket_name" {
+  type = string
+}
+
 resource "aws_s3_bucket" "bucket" {
-  bucket = "yellow-taxi-group-princesinha-s2"
+  bucket = var.bucket_name
   force_destroy = true
 }
 
