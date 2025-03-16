@@ -4,6 +4,9 @@ Sete, primeiramente suas credencias do aws, sobreescrevendo os valores no `~/.aw
 Apos, installe a CLI do terraform: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 ## Terraform Deployment
+
+Para evitar possíveis problemas de alguem rodar mais de uma vez o script com o mesmo nome do bucket, foi criado um arquivo **terraform.tfvars.example**. Remova do nome do arquivo a palavra **.example**, e substitua o valor padrão *your-s3-bucket* pelo nome do seu bucket.
+
 ### Terminal (dentro da pasta raiz do projeto)
 ```bash
 terraform init
@@ -20,8 +23,17 @@ terraform destroy
 
 ---
 
+## Carregamento da base no Postgres
+
+Primeiramente remova o **.example** do arquivo **.env.example**, após isso configure as informações do bucket e de conexão com o banco de acordo com sua infra.
+
+```bash
+pip install -r requirements.txt
+python3 load_taxi_zone_on_database.py
+```
+
 ## Configuração do Airflow
-Eu de volta :)
+
 Agora temos o Airflow numa EC2, da hora demais.
 Para rodar esta maravilha criada pelos deuses, entre na pasta airflow.
 

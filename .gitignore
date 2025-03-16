@@ -1,0 +1,7 @@
+*.parquet
+*.tfstate*
+*.csv
+.terraform
+*.hcl
+.env
+*.tfvars
