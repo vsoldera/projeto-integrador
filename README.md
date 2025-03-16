@@ -69,3 +69,7 @@ Alem disso, vc pode rodar o user-data, sem precisar reiniciar a maquina infinita
 ```
 
 Ai eh so dar um bash no nome do arquivo :)
+
+Nao esquece do destroy quando terminar:
+
+```terraform destroy```
