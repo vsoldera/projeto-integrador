@@ -1,4 +1,3 @@
-# AWS Terraform & Airflow Setup Guide
 
 ## Configuração Inicial
 Sete, primeiramente suas credencias do aws, sobreescrevendo os valores no `~/.aws/credentials`.
