@@ -26,6 +26,29 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = true
 }
 
+resource "aws_kms_key" "s3_key" {
+  description             = "KMS key"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+}
+
+resource "aws_kms_alias" "s3_key_alias" {
+  name          = "alias/s3-bucket-key"
+  target_key_id = aws_kms_key.s3_key.key_id
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
+  bucket = aws_s3_bucket.bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.s3_key.arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
 resource "aws_security_group" "rds_sg" {
   name        = "rds-sg"
   vpc_id      = data.aws_vpc.default.id
