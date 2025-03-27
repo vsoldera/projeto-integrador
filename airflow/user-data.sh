@@ -24,7 +24,7 @@ sudo docker run -d \
   -e AIRFLOW__CORE__LOAD_EXAMPLES=False \
   apache/airflow:2.6.3 \
   standalone
-
+sleep 60
 sudo docker exec -it airflow airflow users delete --username admin
 
 sudo docker exec -it airflow airflow users create \
