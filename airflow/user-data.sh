@@ -22,11 +22,20 @@ sudo docker run -d \
   -v ${AIRFLOW_DIR}/plugins:/opt/airflow/plugins \
   --user ${EC2_UID}:0 \
   -e AIRFLOW__CORE__LOAD_EXAMPLES=False \
+  -e _AIRFLOW_WWW_USER_USERNAME=admin \
+  -e _AIRFLOW_WWW_USER_PASSWORD=admin \
   apache/airflow:2.6.3 \
   standalone
-sleep 60
-sudo docker exec -it airflow airflow users delete --username admin
 
+sleep 60
+
+until sudo docker exec airflow airflow db check; do
+  echo "Waiting for Airflow database to be ready..."
+  sleep 5
+done
+
+echo "Creating Airflow admin user..."
+sudo docker exec -it airflow airflow users delete --username admin || true
 sudo docker exec -it airflow airflow users create \
   --username admin \
   --password admin \
