@@ -61,7 +61,7 @@ resource "aws_instance" "airflow" {
   key_name        = aws_key_pair.airflow_key.key_name
   security_groups = [aws_security_group.airflow_sg.name]
 
-  user_data = templatefile("user-data.sh", {})
+  user_data = file("user-data.sh")
 
   tags = {
     Name = "Airflow-EC2"
