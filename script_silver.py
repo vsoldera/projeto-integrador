@@ -64,12 +64,7 @@ class S3ParquetReader:
         return df
 
     def remove_none_value_based_on_passenger(self, df):
-        print(df.count())
-        df = df.filter(col("passenger_count").isNotNull())
-        df_cleaned = df.filter(
-            (col("PULocationID").isNotNull()) & (col("DOLocationID").isNotNull())
-        )
-        print(df_cleaned.count())
+        df_cleaned = df.filter(col("passenger_count").isNotNull())
         return df_cleaned
 
     def load_taxi_zone(self):
@@ -104,12 +99,12 @@ class S3ParquetReader:
 
         result_df = joined_df.select(
             col("taxi.*"),
-            col("pickup.borough").alias("PU_borough_ID"),
-            col("pickup.zone").alias("PU_zone_ID"),
-            col("pickup.service_zone").alias("PU_service_zone_ID"),
-            col("dropoff.borough").alias("DO_borough_ID"),
-            col("dropoff.zone").alias("DO_zone_ID"),
-            col("dropoff.service_zone").alias("DO_service_zone_ID"),
+            col("pickup.borough").alias("PU_borough"),
+            col("pickup.zone").alias("PU_zone"),
+            col("pickup.service_zone").alias("PU_service_zone"),
+            col("dropoff.borough").alias("DO_borough"),
+            col("dropoff.zone").alias("DO_zone"),
+            col("dropoff.service_zone").alias("DO_service_zone"),
         )
         return result_df
 
@@ -128,7 +123,6 @@ def main():
     taxi_zone_df = reader.load_taxi_zone()
     df_cleaned = reader.remove_none_value_based_on_passenger(df)
     joined_df = reader.join_locations(df_cleaned, taxi_zone_df)
-    print(joined_df.count())
     reader.write_parquet(joined_df)
     reader.stop()
 

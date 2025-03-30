@@ -5,3 +5,4 @@
 *.hcl
 .env
 *.tfvars
+*.ipynb

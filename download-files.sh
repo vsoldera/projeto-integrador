@@ -7,8 +7,8 @@ fi
 
 BUCKET_ID="$1"
 
-for year in {2018}; do
-    for month in {01..02}; do
+for year in {2024}; do
+    for month in {01..03}; do
         filename="yellow_tripdata_${year}-${month}.parquet"
         s3_path="s3://$BUCKET_ID/$filename"
 
@@ -18,7 +18,7 @@ for year in {2018}; do
             curl -o "$filename" "https://d37ci6vzurychx.cloudfront.net/trip-data/$filename"
             
             if [ -f "$filename" ]; then
-                aws s3 cp "$filename" "s3://$BUCKET_ID/"
+                aws s3 cp "$filename" "s3://$BUCKET_ID/bronze/"
                 echo "Finished uploading data for ${year} and ${month}: ${filename}"
             else
                 echo "Erro ao baixar o arquivo $filename. Pulando upload."
