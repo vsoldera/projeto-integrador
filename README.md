@@ -68,6 +68,37 @@ Assim que todos os recursos forem criados, ha a possibilidade de vc, muito prova
    ssh -i ~/.ssh/airflow-key ec2-user@ec2-40-221-11-249.compute-1.amazonaws.com
    ```
 
+### Rodando o Pyspark via Jupyter Notebook
+
+#### Instalação do Pyspark e configução no Jupyter
+
+```bash
+wget https://downloads.apache.org/spark/spark-3.5.0/spark-3.5.0-bin-hadoop3.tgz
+tar -xvzf spark-3.5.0-bin-hadoop3.tgz
+sudo mv spark-3.5.0-bin-hadoop3 /opt/spark
+
+export SPARK_HOME=/opt/spark
+export PATH=$SPARK_HOME/bin:$PATH
+export PYSPARK_PYTHON=python3
+export PYSPARK_DRIVER_PYTHON=jupyter
+export PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+source ~/.bashrc
+```
+
+#### Rodando o pyspark
+
+Primeiro faça o download localmente do **jar** do PostgresSQL
+
+```bash
+wget https://jdbc.postgresql.org/download/postgresql-42.7.2.jar -P ~/jars/
+```
+
+Depois rode passando os seguintes paramêtros:
+
+```bash
+pyspark --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk-bundle:1.11.901 --jars ~/jars/postgresql-42.7.2.jar
+```
+
 ### Troubleshooting
 Se vc tiver muitos problemas e quiser dar uma olhadinha nos logs (NAO RECOMENDADO, QUEM OLHA LOGS?):
 ```bash
