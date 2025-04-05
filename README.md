@@ -115,3 +115,24 @@ Ai eh so dar um bash no nome do arquivo :)
 Nao esquece do destroy quando terminar:
 
 ```terraform destroy```
+
+
+
+
+## Airflow testing
+
+- Adicionar script silver ao s3: aws s3 cp script_silver.py s3://taxi-raw-grupo-5/scripts/process_taxi_data.py
+
+- Adicionar o emr-py para dentro do container airflow: docker cp emr-dag.py container_id:/opt/airflow/dags
+
+- Permissao do S3? Desativar encriptacao
+
+- python -m pip install --upgrade pip
+
+- set java version:
+
+curl -L https://corretto.aws/downloads/latest/amazon-corretto-8-x64-linux-jdk.tar.gz -o corretto-8-linux.tar.gz
+
+export JAVA_HOME=~/java/amazon-corretto-8.442.06.1-linux-x64/
+
+export PATH=$JAVA_HOME/bin:$PATH
