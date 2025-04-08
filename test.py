@@ -11,7 +11,6 @@ import os
 import boto3
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 # Default arguments for DAG
@@ -24,8 +23,7 @@ default_args = {
     'retry_delay': timedelta(minutes=5)
 }
 
-# S3 bucket configuration
-S3_BUCKET = "taxi-lookup-projeto-integrador"  # Using the same bucket from your script
+S3_BUCKET = "taxi-raw-grupo-5"  # Using the same bucket from your script
 S3_SCRIPT_KEY = "scripts/taxi_data_processor.py"  # Path to store the script
 LOCAL_SCRIPT_PATH = "/opt/airflow/dags/taxi_data_processor.py"  # Local path on EC2
 

@@ -125,6 +125,11 @@ Nao esquece do destroy quando terminar:
 
 - Adicionar o emr-py para dentro do container airflow: docker cp emr-dag.py container_id:/opt/airflow/dags
 
+- instalar aws cli dentro do container
+
+```python -m pip install --upgrade pip```
+```pip3 install awscli```
+
 - Permissao do S3? Desativar encriptacao
 
 - python -m pip install --upgrade pip
@@ -136,3 +141,5 @@ curl -L https://corretto.aws/downloads/latest/amazon-corretto-8-x64-linux-jdk.ta
 export JAVA_HOME=~/java/amazon-corretto-8.442.06.1-linux-x64/
 
 export PATH=$JAVA_HOME/bin:$PATH
+
+- Adicionar load_taxi_zone_on_database como dag no airflow :)

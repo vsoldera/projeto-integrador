@@ -111,5 +111,3 @@ result_df.repartition(5).write.mode("overwrite").parquet(f"{s3_path}/silver")
 
 print("Processing complete")
 spark.stop()
-
-taxi_data_processor.py
