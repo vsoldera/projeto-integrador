@@ -3,31 +3,36 @@ from pyspark.sql.functions import col
 from pyspark.sql.types import *
 import os
 
-# For EMR, we'll use environment variables in a different way 
+# For EMR, we'll use environment variables in a different way
 # since we can configure these when submitting the job or store them in AWS Parameter Store
 # For simplicity in this example, we're hardcoding them here
 # In production, you should use AWS Secrets Manager or Parameter Store
 
 # Database connection parameters
-DB_HOST="terraform-20250405130438770700000001.c1zcqqywakmt.us-east-1.rds.amazonaws.com"
-DB_PORT="5432"
-DB_NAME="taxilookupdb"
-DB_USER="foo"
-DB_PASSWORD="foobarbaz"
-SCHEMA_NAME="taxi"
-TABLE_NAME="tb_taxi_zone_lookup"
+DB_HOST = (
+    "terraform-20250405130438770700000001.c1zcqqywakmt.us-east-1.rds.amazonaws.com"
+)
+DB_PORT = "5432"
+DB_NAME = "taxilookupdb"
+DB_USER = "foo"
+DB_PASSWORD = "foobarbaz"
+SCHEMA_NAME = "taxi"
+TABLE_NAME = "tb_taxi_zone_lookup"
 
 url = f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Configure Spark session specifically for EMR
-spark = SparkSession.builder \
-    .appName("TaxiDataProcessor") \
-    .config("spark.jars.packages", "org.postgresql:postgresql:42.5.1") \
+spark = (
+    SparkSession.builder.appName("TaxiDataProcessor")
+    .config("spark.jars.packages", "org.postgresql:postgresql:42.5.1")
     .getOrCreate()
+)
 
 # Set S3 access mode to path style - may be needed depending on your S3 configuration
 spark._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
-spark._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+spark._jsc.hadoopConfiguration().set(
+    "fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"
+)
 
 # Define schema - this matches the schema from your original script
 schema = StructType(
@@ -59,10 +64,7 @@ s3_path = "s3a://taxi-raw-grupo-5"
 
 # Read data from S3
 print(f"Reading Parquet files from: {s3_path}/bronze")
-df = spark.read \
-    .schema(schema) \
-    .format("parquet") \
-    .load(f"{s3_path}/bronze")
+df = spark.read.schema(schema).format("parquet").load(f"{s3_path}/bronze")
 
 # Remove rows with null passenger_count
 df_cleaned = df.filter(col("passenger_count").isNotNull())
@@ -70,30 +72,34 @@ print(f"Data after cleaning: {df_cleaned.count()} rows")
 
 # Load taxi zone data from PostgreSQL
 print("Loading taxi zone data from PostgreSQL")
-taxi_zone_df = spark.read.format("jdbc") \
-    .option("url", url) \
-    .option("dbtable", f"{SCHEMA_NAME}.{TABLE_NAME}") \
-    .option("user", DB_USER) \
-    .option("password", DB_PASSWORD) \
-    .option("driver", "org.postgresql.Driver") \
+taxi_zone_df = (
+    spark.read.format("jdbc")
+    .option("url", url)
+    .option("dbtable", f"{SCHEMA_NAME}.{TABLE_NAME}")
+    .option("user", DB_USER)
+    .option("password", DB_PASSWORD)
+    .option("driver", "org.postgresql.Driver")
     .load()
+)
 
 # Join with location data
 print("Joining with location data")
 zone_df_pickup = taxi_zone_df.alias("pickup")
 zone_df_dropoff = taxi_zone_df.alias("dropoff")
 
-joined_df = df_cleaned.alias("taxi") \
+joined_df = (
+    df_cleaned.alias("taxi")
     .join(
         zone_df_pickup,
         col("taxi.PULocationID") == col("pickup.locationid"),
         "inner",
-    ) \
+    )
     .join(
         zone_df_dropoff,
         col("taxi.DOLocationID") == col("dropoff.locationid"),
         "inner",
     )
+)
 
 result_df = joined_df.select(
     col("taxi.*"),
