@@ -123,38 +123,6 @@ if __name__ == "__main__":
     result_fare_by_distance = analyze_fare_by_distance_bucket(df)
     result_tip_by_payment = analyze_tip_by_payment_type(df)
 
-    print("Tipos de pagamento mais usados com valores totais:")
-    result_payment_type.select(
-        "payment_name",
-        "count",
-        col("total_amount").cast("decimal(38,2)").alias("total_amount"),
-    ).show(truncate=False)
-    print("Tipos de tarifas mais usadas com valores totais:")
-    result_rate_code.select(
-        "rate_code_name",
-        "count",
-        col("total_amount").cast("decimal(38,2)").alias("total_amount"),
-    ).show(truncate=False)
-    print("Frequencia de locais de partida e chegada:")
-    location_frequency_rate_code.groupBy("zone_name", "type").agg(
-        count("*").alias("count")
-    ).orderBy(col("count").desc()).show(truncate=False)
-    print("Média de tarifas por faixa de distância:")
-    result_fare_by_distance.select(
-        "distance_bucket",
-        "trip_count",
-        col("avg_fare").cast("decimal(10,2)"),
-        col("avg_total").cast("decimal(10,2)"),
-    ).show(truncate=False)
-
-    print("Média de gorjetas por tipo de pagamento:")
-    result_tip_by_payment.select(
-        "payment_name",
-        "trip_count",
-        col("avg_tip").cast("decimal(10,2)"),
-        col("total_tip").cast("decimal(10,2)"),
-    ).show(truncate=False)
-
     save_to_gold(result_payment_type, "payment_type")
     save_to_gold(result_rate_code, "rate_code_type")
     save_to_gold(
