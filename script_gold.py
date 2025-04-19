@@ -128,9 +128,8 @@ def save_to_gold_partitioned(df, analysis_name):
 if __name__ == "__main__":
     df = spark.read.parquet(s3_path)
     df = df.withColumn(
-        "pickup_datetime", from_unixtime(col("tpep_pickup_datetime") / 1000)
+        "pickup_month", date_format(col("tpep_pickup_datetime"), "yyyy-MM")
     )
-    df = df.withColumn("pickup_month", date_format(col("pickup_datetime"), "yyyy-MM"))
 
     result_payment_type = analyze_payment_types(df)
     result_rate_code = analyze_rate_code_types(df)
