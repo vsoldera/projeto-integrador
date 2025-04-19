@@ -139,11 +139,6 @@ if __name__ == "__main__":
 
     save_to_gold_partitioned(result_payment_type, "payment_type")
     save_to_gold_partitioned(result_rate_code, "rate_code_type")
-    save_to_gold_partitioned(
-        location_frequency_rate_code.groupBy("zone_name", "type").agg(
-            count("*").alias("count")
-        ),
-        "location_frequency",
-    )
+    save_to_gold_partitioned(location_frequency_rate_code, "location_frequency")
     save_to_gold_partitioned(result_fare_by_distance, "fare_by_distance")
     save_to_gold_partitioned(result_tip_by_payment, "tip_by_payment")
