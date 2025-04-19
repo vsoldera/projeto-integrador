@@ -1,5 +1,14 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, sum, when, lit, avg
+from pyspark.sql.functions import (
+    col,
+    count,
+    sum,
+    avg,
+    when,
+    lit,
+    from_unixtime,
+    date_format,
+)
 
 spark = SparkSession.builder.appName("TaxiDataAnalysis").getOrCreate()
 
@@ -118,6 +127,11 @@ def save_to_gold_partitioned(df, analysis_name):
 
 if __name__ == "__main__":
     df = spark.read.parquet(s3_path)
+    df = df.withColumn(
+        "pickup_datetime", from_unixtime(col("tpep_pickup_datetime") / 1000)
+    )
+    df = df.withColumn("pickup_month", date_format(col("pickup_datetime"), "yyyy-MM"))
+
     result_payment_type = analyze_payment_types(df)
     result_rate_code = analyze_rate_code_types(df)
     location_frequency_rate_code = analyze_location_pu_do_frequency(df)
