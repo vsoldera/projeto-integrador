@@ -34,13 +34,11 @@ def analyze_payment_types(df):
         payment_expr = payment_expr.when(col("payment_type") == key, value)
     df = df.withColumn("payment_name", payment_expr)
 
-    payment_stats = (
-        df.groupBy("payment_type", "payment_name")
+    return (
+        df.groupBy("pickup_month", "payment_name")
         .agg(count("*").alias("count"), sum("total_amount").alias("total_amount"))
-        .orderBy(col("count").desc())
+        .orderBy("pickup_month", col("count").desc())
     )
-
-    return payment_stats
 
 
 def analyze_rate_code_types(df):
@@ -49,23 +47,30 @@ def analyze_rate_code_types(df):
         rate_code_expr = rate_code_expr.when(col("RatecodeID") == key, value)
     df = df.withColumn("rate_code_name", rate_code_expr)
 
-    rate_code_stats = (
-        df.groupBy("RatecodeID", "rate_code_name")
+    return (
+        df.groupBy("pickup_month", "rate_code_name")
         .agg(count("*").alias("count"), sum("total_amount").alias("total_amount"))
-        .orderBy(col("count").desc())
+        .orderBy("pickup_month", col("count").desc())
     )
-
-    return rate_code_stats
 
 
 def analyze_location_pu_do_frequency(df):
-    pickup_df = df.select(col("PU_zone").alias("zone_name")).withColumn(
-        "type", lit("pickup")
+    pickup_df = df.select(
+        col("PU_zone").alias("zone_name"),
+        col("pickup_month"),
+    ).withColumn("type", lit("pickup"))
+
+    dropoff_df = df.select(
+        col("DO_zone").alias("zone_name"),
+        col("pickup_month"),
+    ).withColumn("type", lit("dropoff"))
+
+    return (
+        pickup_df.union(dropoff_df)
+        .groupBy("pickup_month", "zone_name", "type")
+        .agg(count("*").alias("count"))
+        .orderBy("pickup_month", col("count").desc())
     )
-    dropoff_df = df.select(col("DO_zone").alias("zone_name")).withColumn(
-        "type", lit("dropoff")
-    )
-    return pickup_df.union(dropoff_df)
 
 
 def analyze_fare_by_distance_bucket(df):
@@ -78,17 +83,15 @@ def analyze_fare_by_distance_bucket(df):
         .otherwise("10+ miles"),
     )
 
-    distance_stats = (
-        df.groupBy("distance_bucket")
+    return (
+        df.groupBy("pickup_month", "distance_bucket")
         .agg(
             count("*").alias("trip_count"),
             avg("fare_amount").alias("avg_fare"),
             avg("total_amount").alias("avg_total"),
         )
-        .orderBy("distance_bucket")
+        .orderBy("pickup_month", "distance_bucket")
     )
-
-    return distance_stats
 
 
 def analyze_tip_by_payment_type(df):
@@ -97,22 +100,20 @@ def analyze_tip_by_payment_type(df):
         payment_expr = payment_expr.when(col("payment_type") == key, value)
     df = df.withColumn("payment_name", payment_expr)
 
-    tip_stats = (
-        df.groupBy("payment_name")
+    return (
+        df.groupBy("pickup_month", "payment_name")
         .agg(
             count("*").alias("trip_count"),
             avg("tip_amount").alias("avg_tip"),
             sum("tip_amount").alias("total_tip"),
         )
-        .orderBy(col("avg_tip").desc())
+        .orderBy("pickup_month", col("avg_tip").desc())
     )
 
-    return tip_stats
 
-
-def save_to_gold(df, analysis_name):
+def save_to_gold_partitioned(df, analysis_name):
     output_path = f"{gold_path}/{analysis_name}"
-    df.write.mode("overwrite").parquet(output_path)
+    df.write.mode("overwrite").partitionBy("pickup_month").parquet(output_path)
 
 
 if __name__ == "__main__":
@@ -123,13 +124,13 @@ if __name__ == "__main__":
     result_fare_by_distance = analyze_fare_by_distance_bucket(df)
     result_tip_by_payment = analyze_tip_by_payment_type(df)
 
-    save_to_gold(result_payment_type, "payment_type")
-    save_to_gold(result_rate_code, "rate_code_type")
-    save_to_gold(
+    save_to_gold_partitioned(result_payment_type, "payment_type")
+    save_to_gold_partitioned(result_rate_code, "rate_code_type")
+    save_to_gold_partitioned(
         location_frequency_rate_code.groupBy("zone_name", "type").agg(
             count("*").alias("count")
         ),
         "location_frequency",
     )
-    save_to_gold(result_fare_by_distance, "fare_by_distance")
-    save_to_gold(result_tip_by_payment, "tip_by_payment")
+    save_to_gold_partitioned(result_fare_by_distance, "fare_by_distance")
+    save_to_gold_partitioned(result_tip_by_payment, "tip_by_payment")
